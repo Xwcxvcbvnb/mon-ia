@@ -1,1 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon IA</title>
 
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: white;
+    }
+
+    .app {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #chat {
+      min-height: 400px;
+      padding: 10px;
+    }
+
+    .message {
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 12px;
+      white-space: pre-wrap;
+    }
+
+    .user {
+      background: #2563eb;
+      margin-left: 15%;
+    }
+
+    .ai {
+      background: #374151;
+      margin-right: 15%;
+    }
+
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #555;
+      background: #1f2937;
+      color: white;
+      font-size: 16px;
+    }
+
+    #rules {
+      height: 120px;
+    }
+
+    #message {
+      height: 60px;
+      margin-top: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 10px;
+      background: #10b981;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <h1>🤖 Mon IA</h1>
+
+  <h3>⚙️ Mes règles</h3>
+
+  <textarea id="rules">
+Tu es mon assistant personnel.
+Réponds toujours en français.
+Sois sympathique et clair.
+N'invente pas d'informations.
+  </textarea>
+
+  <div id="chat"></div>
+
+  <textarea
+    id="message"
+    placeholder="Écris quelque chose..."
+  ></textarea>
+
+  <button onclick="sendMessage()">
+    Envoyer
+  </button>
+
+</div>
+
+<script>
+
+async function sendMessage() {
+
+  const messageBox = document.getElementById("message");
+  const rulesBox = document.getElementById("rules");
+  const chat = document.getElementById("chat");
+
+  const message = messageBox.value.trim();
+
+  if (!message) return;
+
+  // Message utilisateur
+  const userMessage = document.createElement("div");
+
+  userMessage.className = "message user";
+  userMessage.textContent = message;
+
+  chat.appendChild(userMessage);
+
+  messageBox.value = "";
+
+  // Message temporaire
+  const loading = document.createElement("div");
+
+  loading.className = "message ai";
+  loading.textContent = "🤔 Je réfléchis...";
+
+  chat.appendChild(loading);
+
+  try {
+
+    const response = await fetch("/api/chat", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+
+        message: message,
+
+        rules: rulesBox.value
+
+      })
+
+    });
+
+    const data = await response.json();
+
+    loading.textContent =
+      data.reply || "Une erreur est survenue.";
+
+  } catch (error) {
+
+    loading.textContent =
+      "❌ Impossible de contacter le serveur.";
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>
